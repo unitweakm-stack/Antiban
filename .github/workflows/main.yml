@@ -12,17 +12,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Theos
+      - name: Install Theos and Dependencies
         run: |
+          # Theos-ni yuklash
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
           echo "~/theos/bin" >> $GITHUB_PATH
+          
+          # ldid dasturini o'rnatish (Xato berayotgan joy shu edi)
+          brew install ldid
 
-      - name: Setup SDK (Xatosiz klonlash)
+      - name: Setup SDK
         run: |
-          # Avval xalaqit berayotgan bo'sh papkani o'chiramiz
           rm -rf ~/theos/sdks
-          # Keyin ichi to'la SDK papkani yuklaymiz
           git clone https://github.com/theos/sdks.git ~/theos/sdks
 
       - name: Build
@@ -34,4 +36,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AntiBan-Dylib
-          path: packages/*.dylib
+          path: |
+             .theos/obj/*.dylib
+             packages/*.deb
