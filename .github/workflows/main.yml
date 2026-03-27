@@ -8,38 +8,36 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    # ldid FIX #1: Action
+    # ✅ ldid
     - name: Install ldid
       uses: MOZGIII/install-ldid-action@v1
       with:
         tag: v2.1.5-procursus2
         
-    # Theos
+    # ✅ Theos
     - name: Setup Theos
       run: |
         git clone --depth=1 --recursive https://github.com/theos/theos.git ~/theos
         echo "THEOS=~/theos" >> $GITHUB_ENV
         
-    # Build tools
+    # ✅ Dependencies
     - name: Dependencies
-      run: sudo apt update && sudo apt install -y clang automake autoconf
+      run: sudo apt update && sudo apt install -y clang make perl
         
-    # SDK
-    - name: SDK
+    # ✅ SDK (FIXED)
+    - name: Install SDK
       run: |
-        curl -LO https://github.com/theos/sdks/releases/download/2024-10-01/iPhoneOS14.2.sdk.tar.xz
-        mkdir -p ~/theos/sdks
-        tar -xf iPhoneOS14.2.sdk.tar.xz -C ~/theos/sdks/
+        git clone https://github.com/theos/sdks.git ~/theos/sdks
         
-    # BUILD
+    # ✅ BUILD
     - name: Build tweak
       run: |
         export ARCHS="arm64 arm64e"
         export TARGET="iphone:clang:latest:14.0"
         make clean && make package
         
-    # UPLOAD
+    # ✅ UPLOAD
     - uses: actions/upload-artifact@v4
       with:
         name: Vantrox-deb
-        path: output/*.deb
+        path: packages/*.deb
