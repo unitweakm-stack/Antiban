@@ -3,16 +3,14 @@ name: Build Anti-Ban DYLIB
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # ✅ Bepul!
+    runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
       
     - name: Setup Theos
@@ -21,33 +19,32 @@ jobs:
         echo "THEOS=~/theos" >> $GITHUB_ENV
         echo "$HOME/theos/bin" >> $GITHUB_PATH
         
-    - name: Install dependencies
+    - name: Install ldid (DIRECT DOWNLOAD)
+      run: |
+        curl -L -o /usr/local/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_linux_arm64
+        chmod +x /usr/local/bin/ldid
+        ldid --version  # Test
+        
+    - name: Install build tools
       run: |
         sudo apt update
-        sudo apt install -y clang ldid automake autoconf libtool pkg-config
+        sudo apt install -y clang automake autoconf libtool pkg-config
         
-    - name: iOS SDK (26.4)
+    - name: iOS SDK
       run: |
         wget https://github.com/theos/sdks/releases/download/2024-10-01/iPhoneOS14.2.sdk.tar.xz
         mkdir -p ~/theos/sdks
         tar -xf iPhoneOS14.2.sdk.tar.xz -C ~/theos/sdks/
         
-    - name: Build DYLIB
+    - name: Build
       run: |
-        export THEOS=~/theos
+        cd ~/theos
         export ARCHS="arm64 arm64e"
-        export TARGET=iphone:clang:latest:14.0
-        make clean
+        export TARGET="iphone:clang:latest:14.0"
         make package FINALPACKAGE=1
         
     - name: Upload .deb
       uses: actions/upload-artifact@v4
       with:
-        name: AntiBanProject-deb
+        name: AntiBan-deb
         path: output/*.deb
-        
-    - name: Upload DYLIB
-      uses: actions/upload-artifact@v4
-      with:
-        name: lib-AntiBan-dylib
-        path: .theos/obj/AntiBanProject_arm64/*.dylib
