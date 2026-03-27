@@ -1,0 +1,9 @@
+Package: com.weak.antiban
+Name: AntiBanProject
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Anti-Ban, Device Masking and Key Bypass
+Maintainer: Developer
+Author: Developer
+Section: Tweaks
