@@ -1,4 +1,4 @@
-name: Vantrox Build (FIXED ldid)
+name: Vantrox Build (ldid FIXED)
 on: [push, workflow_dispatch]
 
 jobs:
@@ -8,35 +8,37 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install ldid (CORRECT URL)
-      run: |
-        # ProcursusTeam ldid - TO'G'RI versiya
-        curl -L -o ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus2/ldid
-        chmod +x ldid
-        sudo mv ldid /usr/local/bin/
-        ldid -h  # Test
+    # ldid FIX #1: Action
+    - name: Install ldid
+      uses: MOZGIII/install-ldid-action@v1
+      with:
+        tag: v2.1.5-procursus2
         
+    # Theos
     - name: Setup Theos
       run: |
         git clone --depth=1 --recursive https://github.com/theos/theos.git ~/theos
         echo "THEOS=~/theos" >> $GITHUB_ENV
-        echo "$HOME/theos/bin" >> $GITHUB_PATH
         
-    - name: Build tools
+    # Build tools
+    - name: Dependencies
       run: sudo apt update && sudo apt install -y clang automake autoconf
         
-    - name: iOS SDK
+    # SDK
+    - name: SDK
       run: |
-        curl -L -o sdk.tar.xz https://github.com/theos/sdks/releases/download/2024-10-01/iPhoneOS14.2.sdk.tar.xz
+        curl -LO https://github.com/theos/sdks/releases/download/2024-10-01/iPhoneOS14.2.sdk.tar.xz
         mkdir -p ~/theos/sdks
-        tar -xf sdk.tar.xz -C ~/theos/sdks/
+        tar -xf iPhoneOS14.2.sdk.tar.xz -C ~/theos/sdks/
         
+    # BUILD
     - name: Build tweak
       run: |
         export ARCHS="arm64 arm64e"
         export TARGET="iphone:clang:latest:14.0"
-        make clean && make package FINALPACKAGE=1
+        make clean && make package
         
+    # UPLOAD
     - uses: actions/upload-artifact@v4
       with:
         name: Vantrox-deb
