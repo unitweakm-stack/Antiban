@@ -18,9 +18,11 @@ jobs:
           echo "THEOS=~/theos" >> $GITHUB_ENV
           echo "~/theos/bin" >> $GITHUB_PATH
 
-      - name: Setup SDK (Eng ishonchli usul)
+      - name: Setup SDK (Xatosiz klonlash)
         run: |
-          # SDK-larni to'g'ridan-to'g'ri github'dan klon qilamiz (arxivsiz)
+          # Avval xalaqit berayotgan bo'sh papkani o'chiramiz
+          rm -rf ~/theos/sdks
+          # Keyin ichi to'la SDK papkani yuklaymiz
           git clone https://github.com/theos/sdks.git ~/theos/sdks
 
       - name: Build
