@@ -1,43 +1,44 @@
-name: Vantrox Build (ldid FIXED)
+name: Theos Build (Clean)
+
 on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    # ✅ ldid
-    - name: Install ldid
-      uses: MOZGIII/install-ldid-action@v1
-      with:
-        tag: v2.1.5-procursus2
-        
-    # ✅ Theos
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Theos
     - name: Setup Theos
       run: |
-        git clone --depth=1 --recursive https://github.com/theos/theos.git ~/theos
-        echo "THEOS=~/theos" >> $GITHUB_ENV
-        
-    # ✅ Dependencies
-    - name: Dependencies
-      run: sudo apt update && sudo apt install -y clang make perl
-        
-    # ✅ SDK (FIXED)
-    - name: Install SDK
+        git clone --depth=1 https://github.com/theos/theos.git $HOME/theos
+        echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
+    # SDK (clean + fix)
+    - name: Install SDKs
       run: |
-        git clone https://github.com/theos/sdks.git ~/theos/sdks
-        
-    # ✅ BUILD
+        rm -rf $HOME/theos/sdks
+        git clone https://github.com/theos/sdks.git $HOME/theos/sdks
+
+    # Dependencies
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y make clang perl
+
+    # Build
     - name: Build tweak
       run: |
         export ARCHS="arm64 arm64e"
         export TARGET="iphone:clang:latest:14.0"
-        make clean && make package
-        
-    # ✅ UPLOAD
-    - uses: actions/upload-artifact@v4
+        make clean
+        make package
+
+    # Upload result
+    - name: Upload .deb
+      uses: actions/upload-artifact@v4
       with:
-        name: Vantrox-deb
+        name: tweak-package
         path: packages/*.deb
