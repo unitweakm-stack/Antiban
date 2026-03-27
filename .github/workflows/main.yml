@@ -14,16 +14,14 @@ jobs:
 
       - name: Install Theos
         run: |
-          # Theos-ni yuklash
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
           echo "~/theos/bin" >> $GITHUB_PATH
 
-      - name: Setup SDK (Xatosiz usul)
+      - name: Setup SDK (Eng ishonchli usul)
         run: |
-          # SDK-ni qo'lda yuklash (GitHub API-ga bog'lanmasdan)
-          mkdir -p ~/theos/sdks
-          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz | tar -xJ -C ~/theos/sdks
+          # SDK-larni to'g'ridan-to'g'ri github'dan klon qilamiz (arxivsiz)
+          git clone https://github.com/theos/sdks.git ~/theos/sdks
 
       - name: Build
         run: |
