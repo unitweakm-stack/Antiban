@@ -1,12 +1,6 @@
-export ARCHS = arm64
-export TARGET = iphone:clang:latest:14.0
-
 include $(THEOS)/makefiles/common.mk
-
-TWEAK_NAME = AntiBanProject
-AntiBanProject_FILES = Tweak.x
-AntiBanProject_FRAMEWORKS = UIKit Foundation Security
-AntiBanProject_CFLAGS = -fobjc-arc -Wno-error
-
+TWEAK_NAME = license-bypass
+license-bypass_FILES = Tweak.xm
+license-bypass_CFLAGS = -fobjc-arc
+license-bypass_FRAMEWORKS = UIKit Security
 include $(THEOS)/makefiles/tweak.mk
-
