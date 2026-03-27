@@ -1,41 +1,53 @@
-name: Build Anti-Ban
+name: Build Anti-Ban DYLIB
 
 on:
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest  # ✅ Bepul!
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Theos and Dependencies
-        run: |
-          # Theos-ni yuklash
-          git clone --recursive https://github.com/theos/theos.git ~/theos
-          echo "THEOS=~/theos" >> $GITHUB_ENV
-          echo "~/theos/bin" >> $GITHUB_PATH
-          
-          # ldid dasturini o'rnatish (Xato berayotgan joy shu edi)
-          brew install ldid
-
-      - name: Setup SDK
-        run: |
-          rm -rf ~/theos/sdks
-          git clone https://github.com/theos/sdks.git ~/theos/sdks
-
-      - name: Build
-        run: |
-          export THEOS=~/theos
-          make package FINALPACKAGE=1
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: AntiBan-Dylib
-          path: |
-             .theos/obj/*.dylib
-             packages/*.deb
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Theos
+      run: |
+        git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
+        echo "THEOS=~/theos" >> $GITHUB_ENV
+        echo "$HOME/theos/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y clang ldid automake autoconf libtool pkg-config
+        
+    - name: iOS SDK (26.4)
+      run: |
+        wget https://github.com/theos/sdks/releases/download/2024-10-01/iPhoneOS14.2.sdk.tar.xz
+        mkdir -p ~/theos/sdks
+        tar -xf iPhoneOS14.2.sdk.tar.xz -C ~/theos/sdks/
+        
+    - name: Build DYLIB
+      run: |
+        export THEOS=~/theos
+        export ARCHS="arm64 arm64e"
+        export TARGET=iphone:clang:latest:14.0
+        make clean
+        make package FINALPACKAGE=1
+        
+    - name: Upload .deb
+      uses: actions/upload-artifact@v4
+      with:
+        name: AntiBanProject-deb
+        path: output/*.deb
+        
+    - name: Upload DYLIB
+      uses: actions/upload-artifact@v4
+      with:
+        name: lib-AntiBan-dylib
+        path: .theos/obj/AntiBanProject_arm64/*.dylib
