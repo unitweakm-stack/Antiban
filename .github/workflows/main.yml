@@ -1,50 +1,43 @@
-name: Build Anti-Ban DYLIB
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+name: Vantrox Build (FIXED ldid)
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
+    - uses: actions/checkout@v4
+    
+    - name: Install ldid (CORRECT URL)
+      run: |
+        # ProcursusTeam ldid - TO'G'RI versiya
+        curl -L -o ldid https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus2/ldid
+        chmod +x ldid
+        sudo mv ldid /usr/local/bin/
+        ldid -h  # Test
+        
     - name: Setup Theos
       run: |
-        git clone --recursive --depth=1 https://github.com/theos/theos.git ~/theos
+        git clone --depth=1 --recursive https://github.com/theos/theos.git ~/theos
         echo "THEOS=~/theos" >> $GITHUB_ENV
         echo "$HOME/theos/bin" >> $GITHUB_PATH
         
-    - name: Install ldid (DIRECT DOWNLOAD)
-      run: |
-        curl -L -o /usr/local/bin/ldid https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_linux_arm64
-        chmod +x /usr/local/bin/ldid
-        ldid --version  # Test
-        
-    - name: Install build tools
-      run: |
-        sudo apt update
-        sudo apt install -y clang automake autoconf libtool pkg-config
+    - name: Build tools
+      run: sudo apt update && sudo apt install -y clang automake autoconf
         
     - name: iOS SDK
       run: |
-        wget https://github.com/theos/sdks/releases/download/2024-10-01/iPhoneOS14.2.sdk.tar.xz
+        curl -L -o sdk.tar.xz https://github.com/theos/sdks/releases/download/2024-10-01/iPhoneOS14.2.sdk.tar.xz
         mkdir -p ~/theos/sdks
-        tar -xf iPhoneOS14.2.sdk.tar.xz -C ~/theos/sdks/
+        tar -xf sdk.tar.xz -C ~/theos/sdks/
         
-    - name: Build
+    - name: Build tweak
       run: |
-        cd ~/theos
         export ARCHS="arm64 arm64e"
         export TARGET="iphone:clang:latest:14.0"
-        make package FINALPACKAGE=1
+        make clean && make package FINALPACKAGE=1
         
-    - name: Upload .deb
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4
       with:
-        name: AntiBan-deb
+        name: Vantrox-deb
         path: output/*.deb
